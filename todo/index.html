@@ -11,11 +11,28 @@
     <h1>Todo</h1>
     <form id="new-task">
       <input id="title" placeholder="What needs doing?" aria-label="Task title" autocomplete="off" required>
+      <input id="due" type="date" aria-label="Due date">
+      <input id="tags" placeholder="Tags, comma separated" aria-label="Tags" autocomplete="off">
       <button type="submit">Add</button>
     </form>
+
+    <div class="filters">
+      <div role="group" aria-label="Show" id="status-filter">
+        <button type="button" data-status="all" aria-pressed="true">All</button>
+        <button type="button" data-status="incomplete" aria-pressed="false">Incomplete</button>
+        <button type="button" data-status="completed" aria-pressed="false">Completed</button>
+      </div>
+      <label>Tag
+        <select id="tag-filter">
+          <option value="">All tags</option>
+        </select>
+      </label>
+    </div>
+
     <ul id="tasks"></ul>
-    <p id="empty" hidden>No tasks yet.</p>
+    <p id="empty" hidden>No tasks.</p>
   </main>
+  <script src="logic.js"></script>
   <script src="db.js"></script>
   <script src="app.js"></script>
 </body>

@@ -53,7 +53,32 @@ li {
   border: 1px solid var(--border);
   border-radius: 8px;
 }
-li .title { flex: 1; overflow-wrap: anywhere; }
+#due, #tags { flex: 1 1 140px; }
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+#status-filter { display: flex; gap: 4px; }
+#status-filter button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.filters label { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+
+li .body { flex: 1; min-width: 0; }
+li .title { overflow-wrap: anywhere; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; font-size: 0.8125rem; }
+.due { color: var(--muted); }
+.due.overdue { color: var(--danger); font-weight: 600; }
+.tag {
+  padding: 0 8px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent);
+}
 li.done .title { text-decoration: line-through; color: var(--muted); }
 li input[type="checkbox"] { width: 18px; height: 18px; }
 .delete { color: var(--danger); padding: 4px 10px; }
