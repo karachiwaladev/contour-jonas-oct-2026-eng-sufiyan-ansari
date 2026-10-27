@@ -1,7 +1,7 @@
 // Run: node --test todo/logic.test.js
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseTags, availableTags, filterTasks, isOverdue, nextDue, nextOccurrence, priorityOf, countTasks, sortTasks, SORTS } = require('./logic.js');
+const { parseTags, availableTags, filterTasks, isOverdue, nextDue, nextOccurrence, priorityOf, countTasks, sortTasks, SORTS, completedIds } = require('./logic.js');
 
 const tasks = [
   { id: 1, title: 'a', done: false, tags: ['work', 'urgent'] },
@@ -163,4 +163,18 @@ test('tasks without createdAt sort as oldest, by id', () => {
 
 test('SORTS lists the sort options with creation date first', () => {
   assert.deepEqual(Object.keys(SORTS), ['created', 'due', 'priority']);
+});
+
+test('completedIds lists only the done tasks', () => {
+  assert.deepEqual(completedIds(tasks), [2, 4]);
+  assert.deepEqual(completedIds(tasks.filter((t) => !t.done)), []);
+  assert.deepEqual(completedIds([]), []);
+});
+
+test('clearing completedIds leaves every open task and updates the count', () => {
+  const cleared = new Set(completedIds(tasks));
+  const remaining = tasks.filter((t) => !cleared.has(t.id));
+  assert.deepEqual(ids(remaining), [1, 3]);
+  assert.ok(remaining.every((t) => !t.done));
+  assert.deepEqual(countTasks(remaining), { open: 2, done: 0 });
 });

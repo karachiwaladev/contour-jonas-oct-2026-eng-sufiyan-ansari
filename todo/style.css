@@ -97,5 +97,8 @@ li.editing { display: block; }
 .editor { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
 .editor input:first-child { flex: 1 1 100%; }
 .editor input, .editor select { flex: 1 1 140px; }
-#count { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.875rem; text-align: center; }
+#footer { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+#count { color: var(--muted); font-size: 0.875rem; }
+#clear-completed { padding: 4px 10px; font-size: 0.875rem; color: var(--danger); }
+#clear-completed:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
 #search { flex: 1 1 100%; }

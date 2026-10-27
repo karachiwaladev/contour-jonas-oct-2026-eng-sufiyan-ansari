@@ -73,7 +73,12 @@ const TodoLogic = (() => {
     return { open: tasks.length - done, done };
   }
 
-  const SORTS = { created: 'Newest first', due: 'Due date', priority: 'Priority' };
+  // Ids of the done tasks, for "Clear completed". Open tasks are never included.
+  function completedIds(tasks) {
+    return tasks.filter((t) => t.done).map((t) => t.id);
+  }
+
+  const SORTS ={ created: 'Newest first', due: 'Due date', priority: 'Priority' };
 
   // Newest first; tasks from before createdAt existed count as oldest, then by id.
   const byNewest = (a, b) => (b.createdAt || 0) - (a.createdAt || 0) || (b.id || 0) - (a.id || 0);
@@ -94,7 +99,7 @@ const TodoLogic = (() => {
     return [...tasks].sort((a, b) => compare(a, b) || byNewest(a, b));
   }
 
-  return { PRIORITIES, SORTS, parseTags, availableTags, priorityOf, filterTasks, sortTasks, isOverdue, nextDue, nextOccurrence, countTasks };
+  return { PRIORITIES, SORTS, parseTags, availableTags, priorityOf, filterTasks, sortTasks, isOverdue, nextDue, nextOccurrence, countTasks, completedIds };
 })();
 
 if (typeof module !== 'undefined') module.exports = TodoLogic;

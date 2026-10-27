@@ -7,6 +7,7 @@ const priorityInput = document.getElementById('priority');
 const list = document.getElementById('tasks');
 const empty = document.getElementById('empty');
 const count = document.getElementById('count');
+const clearCompleted = document.getElementById('clear-completed');
 const statusButtons = document.querySelectorAll('#status-filter button');
 const tagFilter = document.getElementById('tag-filter');
 const priorityFilter = document.getElementById('priority-filter');
@@ -43,6 +44,7 @@ async function render() {
   // Totals across all tasks, regardless of the active filters.
   const { open, done } = TodoLogic.countTasks(tasks);
   count.textContent = `${open} open · ${done} done`;
+  clearCompleted.disabled = done === 0;
 }
 
 function renderTagOptions(tags) {
@@ -248,6 +250,15 @@ priorityFilter.addEventListener('change', () => {
 
 search.addEventListener('input', () => {
   filter.query = search.value;
+  render();
+});
+
+// Deletes every done task (not just the ones the filters show), after confirming.
+clearCompleted.addEventListener('click', async () => {
+  const ids = TodoLogic.completedIds(await TodoDB.all());
+  if (!ids.length) return;
+  if (!confirm(`Delete ${ids.length} completed ${ids.length === 1 ? 'task' : 'tasks'}?`)) return;
+  for (const id of ids) await TodoDB.remove(id);
   render();
 });
 

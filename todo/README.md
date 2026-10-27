@@ -23,6 +23,7 @@ python -m http.server -d todo 8000
 - Sort by newest first (default), due date (soonest first, undated last) or priority (high to low); combines with the filters and is remembered across reloads
 - Incomplete tasks past their due date are marked Overdue
 - Footer shows how many tasks are open and how many are done (all tasks, ignoring filters)
+- "Clear completed" next to the footer count deletes every done task after a confirmation; open tasks are kept. It is disabled when nothing is done
 - Recurring tasks: repeat daily, weekly or monthly. Completing one creates the next occurrence, due one interval after its due date (or after today if it has none). Monthly keeps the day of month, clamped to shorter months
 
 ## Test
@@ -37,7 +38,7 @@ node --test todo/logic.test.js
 |------|---------|
 | `index.html` | Markup |
 | `style.css` | Styles (light and dark) |
-| `logic.js` | Pure logic: `parseTags`, `availableTags`, `priorityOf`, `filterTasks`, `sortTasks`, `isOverdue`, `nextDue`, `nextOccurrence`, `countTasks` |
+| `logic.js` | Pure logic: `parseTags`, `availableTags`, `priorityOf`, `filterTasks`, `sortTasks`, `isOverdue`, `nextDue`, `nextOccurrence`, `countTasks`, `completedIds` |
 | `logic.test.js` | Node tests for `logic.js` |
 | `db.js` | IndexedDB wrapper (`TodoDB.all/add/put/remove`) |
 | `app.js` | UI: renders tasks, filters, sort and the inline editor; wires up events (sort choice saved in localStorage) |
