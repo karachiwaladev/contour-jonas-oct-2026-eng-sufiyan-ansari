@@ -32,6 +32,7 @@ Rules:
 - Use the `factory-loop` skill: lowest-numbered open ticket first.
 - Deliverable must match the ticket's wording; close it with a link to the evidence (commit SHA or URL).
 - Push to `main`; only what is on GitHub counts.
+- Implement directly: no spec or design documents and no approval rounds unless the ticket or user asks for them.
 
 ## Ground rules
 
