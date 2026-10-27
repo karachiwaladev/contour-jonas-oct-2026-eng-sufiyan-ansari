@@ -19,6 +19,7 @@ python -m http.server -d todo 8000
 - Filter by status: All, Incomplete or Completed
 - Filter by tag, from a dropdown of the tags in use; clicking a tag chip also filters by it
 - Filter by priority; tasks created before priorities existed count as Medium
+- Search by title as you type (case-insensitive, any part of the title); combines with the other filters
 - Incomplete tasks past their due date are marked Overdue
 - Footer shows how many tasks are open and how many are done (all tasks, ignoring filters)
 - Recurring tasks: repeat daily, weekly or monthly. Completing one creates the next occurrence, due one interval after its due date (or after today if it has none). Monthly keeps the day of month, clamped to shorter months

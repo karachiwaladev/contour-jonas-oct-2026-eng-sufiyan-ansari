@@ -21,8 +21,11 @@ const TodoLogic = (() => {
   }
 
   // status: 'all' | 'incomplete' | 'completed'; tag and priority: '' means any.
-  function filterTasks(tasks, { status = 'all', tag = '', priority = '' } = {}) {
+  // query: case-insensitive substring of the title; blank means any.
+  function filterTasks(tasks, { status = 'all', tag = '', priority = '', query = '' } = {}) {
+    const q = query.trim().toLowerCase();
     return tasks.filter((t) => {
+      if (q && !t.title.toLowerCase().includes(q)) return false;
       if (status === 'incomplete' && t.done) return false;
       if (status === 'completed' && !t.done) return false;
       if (tag && !(t.tags || []).includes(tag)) return false;

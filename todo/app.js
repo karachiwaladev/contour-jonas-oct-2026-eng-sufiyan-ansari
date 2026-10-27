@@ -10,8 +10,9 @@ const count = document.getElementById('count');
 const statusButtons = document.querySelectorAll('#status-filter button');
 const tagFilter = document.getElementById('tag-filter');
 const priorityFilter = document.getElementById('priority-filter');
+const search = document.getElementById('search');
 
-const filter = { status: 'all', tag: '', priority: '' };
+const filter = { status: 'all', tag: '', priority: '', query: '' };
 let editingId = null;
 
 const REPEATS = { none: 'Does not repeat', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
@@ -232,6 +233,11 @@ tagFilter.addEventListener('change', () => {
 
 priorityFilter.addEventListener('change', () => {
   filter.priority = priorityFilter.value;
+  render();
+});
+
+search.addEventListener('input', () => {
+  filter.query = search.value;
   render();
 });
 

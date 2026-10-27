@@ -101,3 +101,17 @@ test('countTasks counts open and done tasks', () => {
   assert.deepEqual(countTasks(tasks), { open: 2, done: 2 });
   assert.deepEqual(countTasks([]), { open: 0, done: 0 });
 });
+
+test('search query matches any part of the title, case-insensitively', () => {
+  const list = [
+    { id: 1, title: 'Pay Rent', done: false, tags: ['home'] },
+    { id: 2, title: 'Buy groceries', done: true, tags: ['home'] },
+    { id: 3, title: 'Parent meeting', done: false, tags: ['work'] },
+  ];
+  assert.deepEqual(ids(filterTasks(list, { query: 'rent' })), [1, 3]);
+  assert.deepEqual(ids(filterTasks(list, { query: '  GROC ' })), [2]);
+  assert.deepEqual(ids(filterTasks(list, { query: 'rent', tag: 'work' })), [3]);
+  assert.deepEqual(ids(filterTasks(list, { query: 'rent', status: 'incomplete', tag: 'home' })), [1]);
+  assert.deepEqual(ids(filterTasks(list, { query: '' })), [1, 2, 3]);
+  assert.deepEqual(ids(filterTasks(list, { query: 'zzz' })), []);
+});
