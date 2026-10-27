@@ -6,11 +6,8 @@ We build and improve the loop; the projects are its output.
 
 ## Progressive disclosure
 
-This file is the **base index**. Keep it small and load detail only when needed:
-
-1. Read this file first: what exists and where.
-2. Open a project's own `README.md` only when a ticket touches that project.
-3. Open source files only after the README tells you which ones matter.
+This file is the **base index**: what exists and where. Keep it small; detail lives in each
+project's `README.md`, so start there when a ticket touches a project, then open the source it points to.
 
 Rules:
 - **Keep this file under 100 lines at all times.** Detail belongs in the project folder, not here.
