@@ -65,7 +65,12 @@ const TodoLogic = (() => {
     };
   }
 
-  return { PRIORITIES, parseTags, availableTags, priorityOf, filterTasks, isOverdue, nextDue, nextOccurrence };
+  function countTasks(tasks) {
+    const done = tasks.filter((t) => t.done).length;
+    return { open: tasks.length - done, done };
+  }
+
+  return { PRIORITIES, parseTags, availableTags, priorityOf, filterTasks, isOverdue, nextDue, nextOccurrence, countTasks };
 })();
 
 if (typeof module !== 'undefined') module.exports = TodoLogic;

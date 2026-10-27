@@ -6,6 +6,7 @@ const repeatInput = document.getElementById('repeat');
 const priorityInput = document.getElementById('priority');
 const list = document.getElementById('tasks');
 const empty = document.getElementById('empty');
+const count = document.getElementById('count');
 const statusButtons = document.querySelectorAll('#status-filter button');
 const tagFilter = document.getElementById('tag-filter');
 const priorityFilter = document.getElementById('priority-filter');
@@ -28,6 +29,9 @@ async function render() {
   list.replaceChildren(...shown.map((t) => (t.id === editingId ? renderEditor(t) : renderTask(t))));
   empty.hidden = shown.length > 0;
   empty.textContent = tasks.length ? 'No tasks match these filters.' : 'No tasks yet.';
+  // Totals across all tasks, regardless of the active filters.
+  const { open, done } = TodoLogic.countTasks(tasks);
+  count.textContent = `${open} open · ${done} done`;
 }
 
 function renderTagOptions(tags) {

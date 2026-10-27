@@ -1,7 +1,7 @@
 // Run: node --test todo/logic.test.js
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseTags, availableTags, filterTasks, isOverdue, nextDue, nextOccurrence, priorityOf } = require('./logic.js');
+const { parseTags, availableTags, filterTasks, isOverdue, nextDue, nextOccurrence, priorityOf, countTasks } = require('./logic.js');
 
 const tasks = [
   { id: 1, title: 'a', done: false, tags: ['work', 'urgent'] },
@@ -95,4 +95,9 @@ test('priority filter combines with status and tag filters', () => {
 test('nextOccurrence keeps the priority', () => {
   const task = { title: 'x', done: true, due: '2026-10-26', repeat: 'daily', priority: 'high' };
   assert.equal(nextOccurrence(task, '2026-10-26', 1).priority, 'high');
+});
+
+test('countTasks counts open and done tasks', () => {
+  assert.deepEqual(countTasks(tasks), { open: 2, done: 2 });
+  assert.deepEqual(countTasks([]), { open: 0, done: 0 });
 });
