@@ -73,7 +73,28 @@ const TodoLogic = (() => {
     return { open: tasks.length - done, done };
   }
 
-  return { PRIORITIES, parseTags, availableTags, priorityOf, filterTasks, isOverdue, nextDue, nextOccurrence, countTasks };
+  const SORTS = { created: 'Newest first', due: 'Due date', priority: 'Priority' };
+
+  // Newest first; tasks from before createdAt existed count as oldest, then by id.
+  const byNewest = (a, b) => (b.createdAt || 0) - (a.createdAt || 0) || (b.id || 0) - (a.id || 0);
+
+  const COMPARE = {
+    created: byNewest,
+    // Soonest due first; tasks without a due date go last.
+    due: (a, b) => {
+      if (a.due && b.due) return a.due < b.due ? -1 : a.due > b.due ? 1 : 0;
+      return Boolean(b.due) - Boolean(a.due);
+    },
+    priority: (a, b) => PRIORITIES.indexOf(priorityOf(a)) - PRIORITIES.indexOf(priorityOf(b)),
+  };
+
+  // sort: a key of SORTS; anything else falls back to 'created'. Returns a new array.
+  function sortTasks(tasks, sort = 'created') {
+    const compare = Object.hasOwn(COMPARE, sort) ? COMPARE[sort] : byNewest;
+    return [...tasks].sort((a, b) => compare(a, b) || byNewest(a, b));
+  }
+
+  return { PRIORITIES, SORTS, parseTags, availableTags, priorityOf, filterTasks, sortTasks, isOverdue, nextDue, nextOccurrence, countTasks };
 })();
 
 if (typeof module !== 'undefined') module.exports = TodoLogic;

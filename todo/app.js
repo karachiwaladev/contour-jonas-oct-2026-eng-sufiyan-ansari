@@ -11,8 +11,18 @@ const statusButtons = document.querySelectorAll('#status-filter button');
 const tagFilter = document.getElementById('tag-filter');
 const priorityFilter = document.getElementById('priority-filter');
 const search = document.getElementById('search');
+const sortSelect = document.getElementById('sort');
 
 const filter = { status: 'all', tag: '', priority: '', query: '' };
+
+// The chosen sort survives reloads. Storage can be unavailable (private mode), so fall back quietly.
+const SORT_KEY = 'todo-sort';
+let sort = 'created';
+try {
+  const saved = localStorage.getItem(SORT_KEY);
+  if (Object.hasOwn(TodoLogic.SORTS, saved)) sort = saved;
+} catch {}
+sortSelect.value = sort;
 let editingId = null;
 
 const REPEATS = { none: 'Does not repeat', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
@@ -26,7 +36,7 @@ function today() {
 async function render() {
   const tasks = await TodoDB.all();
   renderTagOptions(TodoLogic.availableTags(tasks));
-  const shown = TodoLogic.filterTasks(tasks, filter);
+  const shown = TodoLogic.sortTasks(TodoLogic.filterTasks(tasks, filter), sort);
   list.replaceChildren(...shown.map((t) => (t.id === editingId ? renderEditor(t) : renderTask(t))));
   empty.hidden = shown.length > 0;
   empty.textContent = tasks.length ? 'No tasks match these filters.' : 'No tasks yet.';
@@ -238,6 +248,14 @@ priorityFilter.addEventListener('change', () => {
 
 search.addEventListener('input', () => {
   filter.query = search.value;
+  render();
+});
+
+sortSelect.addEventListener('change', () => {
+  sort = sortSelect.value;
+  try {
+    localStorage.setItem(SORT_KEY, sort);
+  } catch {}
   render();
 });
 

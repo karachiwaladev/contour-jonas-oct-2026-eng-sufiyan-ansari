@@ -1,7 +1,7 @@
 // Run: node --test todo/logic.test.js
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseTags, availableTags, filterTasks, isOverdue, nextDue, nextOccurrence, priorityOf, countTasks } = require('./logic.js');
+const { parseTags, availableTags, filterTasks, isOverdue, nextDue, nextOccurrence, priorityOf, countTasks, sortTasks, SORTS } = require('./logic.js');
 
 const tasks = [
   { id: 1, title: 'a', done: false, tags: ['work', 'urgent'] },
@@ -114,4 +114,53 @@ test('search query matches any part of the title, case-insensitively', () => {
   assert.deepEqual(ids(filterTasks(list, { query: 'rent', status: 'incomplete', tag: 'home' })), [1]);
   assert.deepEqual(ids(filterTasks(list, { query: '' })), [1, 2, 3]);
   assert.deepEqual(ids(filterTasks(list, { query: 'zzz' })), []);
+});
+
+const sortable = [
+  { id: 1, title: 'a', done: false, due: '2026-11-05', priority: 'low', createdAt: 100 },
+  { id: 2, title: 'b', done: true, due: null, priority: 'high', createdAt: 300 },
+  { id: 3, title: 'c', done: false, due: '2026-11-01', createdAt: 200 }, // no priority: medium
+  { id: 4, title: 'd', done: false, due: '2026-11-01', priority: 'high', createdAt: 400 },
+];
+
+test('sortTasks defaults to creation date, newest first', () => {
+  assert.deepEqual(ids(sortTasks(sortable)), [4, 2, 3, 1]);
+  assert.deepEqual(ids(sortTasks(sortable, 'created')), [4, 2, 3, 1]);
+  assert.deepEqual(ids(sortTasks(sortable, 'bogus')), [4, 2, 3, 1]);
+  assert.deepEqual(ids(sortTasks(sortable, 'toString')), [4, 2, 3, 1]);
+});
+
+test('sortTasks by due date puts the soonest first and undated tasks last', () => {
+  assert.deepEqual(ids(sortTasks(sortable, 'due')), [4, 3, 1, 2]);
+});
+
+test('sortTasks by priority goes high, medium, low', () => {
+  assert.deepEqual(ids(sortTasks(sortable, 'priority')), [4, 2, 3, 1]);
+  const list = [
+    { id: 1, priority: 'low', createdAt: 1 },
+    { id: 2, createdAt: 2 },
+    { id: 3, priority: 'high', createdAt: 3 },
+  ];
+  assert.deepEqual(ids(sortTasks(list, 'priority')), [3, 2, 1]);
+});
+
+test('sortTasks does not modify its input', () => {
+  const before = ids(sortable);
+  sortTasks(sortable, 'due');
+  assert.deepEqual(ids(sortable), before);
+});
+
+test('sorting combines with the filters', () => {
+  const shown = sortTasks(filterTasks(sortable, { status: 'incomplete', query: '' }), 'due');
+  assert.deepEqual(ids(shown), [4, 3, 1]);
+  assert.deepEqual(ids(sortTasks(filterTasks(sortable, { priority: 'high' }), 'due')), [4, 2]);
+});
+
+test('tasks without createdAt sort as oldest, by id', () => {
+  const list = [{ id: 1 }, { id: 2 }, { id: 3, createdAt: 5 }];
+  assert.deepEqual(ids(sortTasks(list)), [3, 2, 1]);
+});
+
+test('SORTS lists the sort options with creation date first', () => {
+  assert.deepEqual(Object.keys(SORTS), ['created', 'due', 'priority']);
 });
