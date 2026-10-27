@@ -32,7 +32,7 @@ Tickets arrive as GitHub issues titled `Ticket #N`. Only what is on GitHub count
    - Ticket asks for an answer → post it as a comment on the question issue.
    - Ticket asks for a fact → look it up live (WebSearch/WebFetch) and cite the source URL. Prefer official sources; if none is reachable, cite two agreeing secondary sources and say so. Figures from memory must be labeled unverified.
    - Ticket asks for files → write them, commit, `git push origin main`.
-5. **Check against the ask.** Re-read the sentence from step 3. Same subject, same entity, same format? If the user changed the subject on purpose, note it on the parent ticket instead of quietly diverging.
+5. **Check against the ask.** Re-read the sentence from step 3. Same subject, same entity, same format? If the user changed the subject on purpose, note it on the parent ticket instead of quietly diverging. For file deliverables, have the `ticket-checker` agent check every acceptance criterion, and the `ui-checker` agent check any UI change in the browser, before closing.
 6. **Close out, children first.** For each issue you created: tick its completed checkboxes and close it if the ticket says to. Then close the parent ticket with one `gh issue close --comment` linking the evidence (issue URL, comment URL, or commit SHA). Confirm with `gh issue view` that the states and links are right.
 7. **Next ticket**, back to step 2.
 

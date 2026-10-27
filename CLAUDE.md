@@ -25,6 +25,7 @@ Rules:
 |------|---------|
 | `.claude/skills/factory-loop/` | Skill: work open `Ticket #N` issues end to end |
 | `.claude/settings.json` | Guardrails: `permissions.deny` plus PreToolUse hook `.claude/hooks/block-dangerous.js` (tests beside it) |
+| `.claude/agents/` | Subagents: `ticket-checker` (acceptance criteria before close), `ui-checker` (browser screenshots and layout after UI changes) |
 | `todo/` | Todo app (browser, IndexedDB): tasks, done, delete, status and tag filters, due dates, tags, recurring tasks, priority, edit, count footer, search, sort, clear completed |
 
 ## Working tickets
