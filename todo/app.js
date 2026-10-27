@@ -3,12 +3,18 @@ const input = document.getElementById('title');
 const dueInput = document.getElementById('due');
 const tagsInput = document.getElementById('tags');
 const repeatInput = document.getElementById('repeat');
+const priorityInput = document.getElementById('priority');
 const list = document.getElementById('tasks');
 const empty = document.getElementById('empty');
 const statusButtons = document.querySelectorAll('#status-filter button');
 const tagFilter = document.getElementById('tag-filter');
+const priorityFilter = document.getElementById('priority-filter');
 
-const filter = { status: 'all', tag: '' };
+const filter = { status: 'all', tag: '', priority: '' };
+let editingId = null;
+
+const REPEATS = { none: 'Does not repeat', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
+const capitalize = (s) => s[0].toUpperCase() + s.slice(1);
 
 function today() {
   const d = new Date();
@@ -19,7 +25,7 @@ async function render() {
   const tasks = await TodoDB.all();
   renderTagOptions(TodoLogic.availableTags(tasks));
   const shown = TodoLogic.filterTasks(tasks, filter);
-  list.replaceChildren(...shown.map(renderTask));
+  list.replaceChildren(...shown.map((t) => (t.id === editingId ? renderEditor(t) : renderTask(t))));
   empty.hidden = shown.length > 0;
   empty.textContent = tasks.length ? 'No tasks match these filters.' : 'No tasks yet.';
 }
@@ -30,6 +36,19 @@ function renderTagOptions(tags) {
   const options = tags.map((tag) => new Option(`#${tag}`, tag));
   tagFilter.replaceChildren(new Option('All tags', ''), ...options);
   tagFilter.value = filter.tag;
+}
+
+function select(options, value, label) {
+  const el = document.createElement('select');
+  el.setAttribute('aria-label', label);
+  for (const [v, text] of Object.entries(options)) el.append(new Option(text, v));
+  el.value = value;
+  return el;
+}
+
+function prioritySelect(value) {
+  const options = Object.fromEntries(TodoLogic.PRIORITIES.map((p) => [p, `${capitalize(p)} priority`]));
+  return select(options, value, 'Priority');
 }
 
 function renderTask(task) {
@@ -61,6 +80,12 @@ function renderTask(task) {
 
   const meta = document.createElement('div');
   meta.className = 'meta';
+  const priority = TodoLogic.priorityOf(task);
+  const badge = document.createElement('span');
+  badge.className = `priority priority-${priority}`;
+  badge.textContent = capitalize(priority);
+  badge.title = `${capitalize(priority)} priority`;
+  meta.append(badge);
   if (task.due) {
     const due = document.createElement('span');
     const overdue = TodoLogic.isOverdue(task, today());
@@ -86,7 +111,17 @@ function renderTask(task) {
     });
     meta.append(chip);
   }
-  if (meta.childElementCount) body.append(meta);
+  body.append(meta);
+
+  const edit = document.createElement('button');
+  edit.type = 'button';
+  edit.className = 'edit';
+  edit.textContent = 'Edit';
+  edit.setAttribute('aria-label', `Edit "${task.title}"`);
+  edit.addEventListener('click', () => {
+    editingId = task.id;
+    render();
+  });
 
   const del = document.createElement('button');
   del.type = 'button';
@@ -98,7 +133,65 @@ function renderTask(task) {
     render();
   });
 
-  li.append(check, body, del);
+  li.append(check, body, edit, del);
+  return li;
+}
+
+// Inline edit form: title, due date, tags, repeat and priority.
+function renderEditor(task) {
+  const li = document.createElement('li');
+  li.className = 'editing';
+  const editor = document.createElement('form');
+  editor.className = 'editor';
+
+  const title = document.createElement('input');
+  title.value = task.title;
+  title.required = true;
+  title.setAttribute('aria-label', 'Task title');
+  const due = document.createElement('input');
+  due.type = 'date';
+  due.value = task.due || '';
+  due.setAttribute('aria-label', 'Due date');
+  const tags = document.createElement('input');
+  tags.value = (task.tags || []).join(', ');
+  tags.placeholder = 'Tags, comma separated';
+  tags.setAttribute('aria-label', 'Tags');
+  const repeat = select(REPEATS, task.repeat || 'none', 'Repeat');
+  const priority = prioritySelect(TodoLogic.priorityOf(task));
+
+  const save = document.createElement('button');
+  save.type = 'submit';
+  save.textContent = 'Save';
+  const cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.textContent = 'Cancel';
+  const stopEditing = () => {
+    editingId = null;
+    render();
+  };
+  cancel.addEventListener('click', stopEditing);
+  editor.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') stopEditing();
+  });
+
+  editor.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = title.value.trim();
+    if (!text) return;
+    await TodoDB.put({
+      ...task,
+      title: text,
+      due: due.value || null,
+      tags: TodoLogic.parseTags(tags.value),
+      repeat: repeat.value,
+      priority: priority.value,
+    });
+    stopEditing();
+  });
+
+  editor.append(title, due, tags, repeat, priority, save, cancel);
+  li.append(editor);
+  queueMicrotask(() => title.focus());
   return li;
 }
 
@@ -112,6 +205,7 @@ form.addEventListener('submit', async (e) => {
     due: dueInput.value || null,
     tags: TodoLogic.parseTags(tagsInput.value),
     repeat: repeatInput.value,
+    priority: priorityInput.value,
     createdAt: Date.now(),
   });
   form.reset();
@@ -129,6 +223,11 @@ statusButtons.forEach((btn) => {
 
 tagFilter.addEventListener('change', () => {
   filter.tag = tagFilter.value;
+  render();
+});
+
+priorityFilter.addEventListener('change', () => {
+  filter.priority = priorityFilter.value;
   render();
 });
 

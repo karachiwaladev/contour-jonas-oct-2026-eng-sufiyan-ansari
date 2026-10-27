@@ -6,6 +6,8 @@
   --border: #d9d9de;
   --accent: #2f6fde;
   --danger: #c4302b;
+  --warn: #a65f00;
+  --ok: #2b7a3d;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -16,6 +18,8 @@
     --border: #3a3a3f;
     --accent: #6c9cf0;
     --danger: #ef6b66;
+    --warn: #e0a030;
+    --ok: #6cc77f;
   }
 }
 
@@ -53,7 +57,7 @@ li {
   border: 1px solid var(--border);
   border-radius: 8px;
 }
-#due, #tags, #repeat { flex: 1 1 140px; }
+#due, #tags, #repeat, #priority { flex: 1 1 140px; }
 
 .filters {
   display: flex;
@@ -81,5 +85,15 @@ li .title { overflow-wrap: anywhere; }
 }
 li.done .title { text-decoration: line-through; color: var(--muted); }
 li input[type="checkbox"] { width: 18px; height: 18px; }
-.delete { color: var(--danger); padding: 4px 10px; }
+.edit, .delete { padding: 4px 10px; }
+.delete { color: var(--danger); }
 #empty { color: var(--muted); text-align: center; }
+.priority { font-weight: 600; }
+.priority-high { color: var(--danger); }
+.priority-medium { color: var(--warn); }
+.priority-low { color: var(--ok); }
+.filters > label:first-of-type { margin-left: auto; }
+li.editing { display: block; }
+.editor { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.editor input:first-child { flex: 1 1 100%; }
+.editor input, .editor select { flex: 1 1 140px; }

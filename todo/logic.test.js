@@ -1,7 +1,7 @@
 // Run: node --test todo/logic.test.js
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseTags, availableTags, filterTasks, isOverdue, nextDue, nextOccurrence } = require('./logic.js');
+const { parseTags, availableTags, filterTasks, isOverdue, nextDue, nextOccurrence, priorityOf } = require('./logic.js');
 
 const tasks = [
   { id: 1, title: 'a', done: false, tags: ['work', 'urgent'] },
@@ -57,7 +57,7 @@ test('nextOccurrence copies a recurring task with the next due date', () => {
   const task = { id: 9, title: 'Pay rent', done: true, due: '2026-10-01', tags: ['home'], repeat: 'monthly' };
   const next = nextOccurrence(task, '2026-10-26', 123);
   assert.deepEqual(next, {
-    title: 'Pay rent', done: false, due: '2026-11-01', tags: ['home'], repeat: 'monthly', createdAt: 123,
+    title: 'Pay rent', done: false, due: '2026-11-01', tags: ['home'], repeat: 'monthly', priority: 'medium', createdAt: 123,
   });
 });
 
@@ -70,4 +70,29 @@ test('nextOccurrence is null for non-recurring or already-repeated tasks', () =>
   assert.equal(nextOccurrence({ title: 'x', done: true }, '2026-10-26', 1), null);
   assert.equal(nextOccurrence({ title: 'x', done: true, repeat: 'none' }, '2026-10-26', 1), null);
   assert.equal(nextOccurrence({ title: 'x', done: true, repeat: 'daily', recurred: true }, '2026-10-26', 1), null);
+});
+
+test('priorityOf defaults to medium for tasks without a valid priority', () => {
+  assert.equal(priorityOf({ priority: 'high' }), 'high');
+  assert.equal(priorityOf({ priority: 'low' }), 'low');
+  assert.equal(priorityOf({}), 'medium');
+  assert.equal(priorityOf({ priority: 'bogus' }), 'medium');
+});
+
+test('priority filter combines with status and tag filters', () => {
+  const list = [
+    { id: 1, done: false, tags: ['work'], priority: 'high' },
+    { id: 2, done: true, tags: ['work'], priority: 'high' },
+    { id: 3, done: false, tags: [], priority: 'low' },
+    { id: 4, done: false }, // created before priority existed -> medium
+  ];
+  assert.deepEqual(ids(filterTasks(list, { priority: 'high' })), [1, 2]);
+  assert.deepEqual(ids(filterTasks(list, { priority: 'medium' })), [4]);
+  assert.deepEqual(ids(filterTasks(list, { priority: 'high', status: 'incomplete', tag: 'work' })), [1]);
+  assert.deepEqual(ids(filterTasks(list, { priority: '' })), [1, 2, 3, 4]);
+});
+
+test('nextOccurrence keeps the priority', () => {
+  const task = { title: 'x', done: true, due: '2026-10-26', repeat: 'daily', priority: 'high' };
+  assert.equal(nextOccurrence(task, '2026-10-26', 1).priority, 'high');
 });

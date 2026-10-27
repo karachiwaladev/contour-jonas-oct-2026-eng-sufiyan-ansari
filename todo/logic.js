@@ -13,12 +13,20 @@ const TodoLogic = (() => {
     return [...new Set(tasks.flatMap((t) => t.tags || []))].sort();
   }
 
-  // status: 'all' | 'incomplete' | 'completed'; tag: '' means any tag.
-  function filterTasks(tasks, { status = 'all', tag = '' } = {}) {
+  const PRIORITIES = ['high', 'medium', 'low'];
+
+  // Tasks created before priorities existed (or with a bad value) count as medium.
+  function priorityOf(task) {
+    return PRIORITIES.includes(task.priority) ? task.priority : 'medium';
+  }
+
+  // status: 'all' | 'incomplete' | 'completed'; tag and priority: '' means any.
+  function filterTasks(tasks, { status = 'all', tag = '', priority = '' } = {}) {
     return tasks.filter((t) => {
       if (status === 'incomplete' && t.done) return false;
       if (status === 'completed' && !t.done) return false;
       if (tag && !(t.tags || []).includes(tag)) return false;
+      if (priority && priorityOf(t) !== priority) return false;
       return true;
     });
   }
@@ -52,11 +60,12 @@ const TodoLogic = (() => {
       due: nextDue(task.due || today, task.repeat),
       tags: task.tags || [],
       repeat: task.repeat,
+      priority: priorityOf(task),
       createdAt: now,
     };
   }
 
-  return { parseTags, availableTags, filterTasks, isOverdue, nextDue, nextOccurrence };
+  return { PRIORITIES, parseTags, availableTags, priorityOf, filterTasks, isOverdue, nextDue, nextOccurrence };
 })();
 
 if (typeof module !== 'undefined') module.exports = TodoLogic;
