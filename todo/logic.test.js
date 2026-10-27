@@ -1,7 +1,7 @@
 // Run: node --test todo/logic.test.js
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseTags, availableTags, filterTasks, isOverdue } = require('./logic.js');
+const { parseTags, availableTags, filterTasks, isOverdue, nextDue, nextOccurrence } = require('./logic.js');
 
 const tasks = [
   { id: 1, title: 'a', done: false, tags: ['work', 'urgent'] },
@@ -38,4 +38,36 @@ test('isOverdue: incomplete task with a due date before today', () => {
   assert.equal(isOverdue({ done: false, due: '2026-10-26' }, today), false);
   assert.equal(isOverdue({ done: true, due: '2026-10-01' }, today), false);
   assert.equal(isOverdue({ done: false }, today), false);
+});
+
+test('nextDue advances by day, week or month', () => {
+  assert.equal(nextDue('2026-10-26', 'daily'), '2026-10-27');
+  assert.equal(nextDue('2026-10-31', 'daily'), '2026-11-01');
+  assert.equal(nextDue('2026-12-29', 'weekly'), '2027-01-05');
+  assert.equal(nextDue('2026-10-15', 'monthly'), '2026-11-15');
+  assert.equal(nextDue('2026-12-15', 'monthly'), '2027-01-15');
+});
+
+test('nextDue monthly clamps to the last day of a shorter month', () => {
+  assert.equal(nextDue('2026-01-31', 'monthly'), '2026-02-28');
+  assert.equal(nextDue('2028-01-31', 'monthly'), '2028-02-29');
+});
+
+test('nextOccurrence copies a recurring task with the next due date', () => {
+  const task = { id: 9, title: 'Pay rent', done: true, due: '2026-10-01', tags: ['home'], repeat: 'monthly' };
+  const next = nextOccurrence(task, '2026-10-26', 123);
+  assert.deepEqual(next, {
+    title: 'Pay rent', done: false, due: '2026-11-01', tags: ['home'], repeat: 'monthly', createdAt: 123,
+  });
+});
+
+test('nextOccurrence counts from today when there is no due date', () => {
+  const task = { title: 'Stretch', done: true, due: null, tags: [], repeat: 'daily' };
+  assert.equal(nextOccurrence(task, '2026-10-26', 1).due, '2026-10-27');
+});
+
+test('nextOccurrence is null for non-recurring or already-repeated tasks', () => {
+  assert.equal(nextOccurrence({ title: 'x', done: true }, '2026-10-26', 1), null);
+  assert.equal(nextOccurrence({ title: 'x', done: true, repeat: 'none' }, '2026-10-26', 1), null);
+  assert.equal(nextOccurrence({ title: 'x', done: true, repeat: 'daily', recurred: true }, '2026-10-26', 1), null);
 });

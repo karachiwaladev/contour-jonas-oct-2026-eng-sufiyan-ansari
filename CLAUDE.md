@@ -27,7 +27,7 @@ Rules:
 | Path | Purpose |
 |------|---------|
 | `.claude/skills/factory-loop/` | Skill: work open `Ticket #N` issues end to end |
-| `todo/` | Todo app (browser, IndexedDB): tasks, done, delete, status and tag filters, due dates, tags |
+| `todo/` | Todo app (browser, IndexedDB): tasks, done, delete, status and tag filters, due dates, tags, recurring tasks |
 
 ## Working tickets
 

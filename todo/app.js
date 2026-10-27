@@ -2,6 +2,7 @@ const form = document.getElementById('new-task');
 const input = document.getElementById('title');
 const dueInput = document.getElementById('due');
 const tagsInput = document.getElementById('tags');
+const repeatInput = document.getElementById('repeat');
 const list = document.getElementById('tasks');
 const empty = document.getElementById('empty');
 const statusButtons = document.querySelectorAll('#status-filter button');
@@ -40,7 +41,14 @@ function renderTask(task) {
   check.checked = task.done;
   check.setAttribute('aria-label', `Mark "${task.title}" done`);
   check.addEventListener('change', async () => {
-    await TodoDB.put({ ...task, done: check.checked });
+    const updated = { ...task, done: check.checked };
+    // Completing a recurring task schedules its next occurrence, once.
+    const next = check.checked ? TodoLogic.nextOccurrence(task, today(), Date.now()) : null;
+    if (next) {
+      updated.recurred = true;
+      await TodoDB.add(next);
+    }
+    await TodoDB.put(updated);
     render();
   });
 
@@ -59,6 +67,12 @@ function renderTask(task) {
     due.className = overdue ? 'due overdue' : 'due';
     due.textContent = `${overdue ? 'Overdue' : 'Due'} ${task.due}`;
     meta.append(due);
+  }
+  if (task.repeat && task.repeat !== 'none') {
+    const repeat = document.createElement('span');
+    repeat.className = 'repeat';
+    repeat.textContent = `Repeats ${task.repeat}`;
+    meta.append(repeat);
   }
   for (const tag of task.tags || []) {
     const chip = document.createElement('button');
@@ -97,6 +111,7 @@ form.addEventListener('submit', async (e) => {
     done: false,
     due: dueInput.value || null,
     tags: TodoLogic.parseTags(tagsInput.value),
+    repeat: repeatInput.value,
     createdAt: Date.now(),
   });
   form.reset();

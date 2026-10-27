@@ -28,7 +28,35 @@ const TodoLogic = (() => {
     return !task.done && Boolean(task.due) && task.due < today;
   }
 
-  return { parseTags, availableTags, filterTasks, isOverdue };
+  // repeat: 'daily' | 'weekly' | 'monthly'. Works in UTC so time zones can't shift the date.
+  // Monthly keeps the day of month, clamped to the target month's length (Jan 31 -> Feb 28).
+  function nextDue(due, repeat) {
+    const [y, m, d] = due.split('-').map(Number);
+    let date;
+    if (repeat === 'daily') date = new Date(Date.UTC(y, m - 1, d + 1));
+    else if (repeat === 'weekly') date = new Date(Date.UTC(y, m - 1, d + 7));
+    else if (repeat === 'monthly') {
+      const lastDay = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+      date = new Date(Date.UTC(y, m, Math.min(d, lastDay)));
+    } else throw new Error(`Unknown repeat: ${repeat}`);
+    return date.toISOString().slice(0, 10);
+  }
+
+  // The task to create when a recurring task is completed, or null if none is due.
+  // `recurred` marks a task whose next occurrence already exists, so re-checking it doesn't duplicate.
+  function nextOccurrence(task, today, now) {
+    if (!task.repeat || task.repeat === 'none' || task.recurred) return null;
+    return {
+      title: task.title,
+      done: false,
+      due: nextDue(task.due || today, task.repeat),
+      tags: task.tags || [],
+      repeat: task.repeat,
+      createdAt: now,
+    };
+  }
+
+  return { parseTags, availableTags, filterTasks, isOverdue, nextDue, nextOccurrence };
 })();
 
 if (typeof module !== 'undefined') module.exports = TodoLogic;
