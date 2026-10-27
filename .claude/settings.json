@@ -1,0 +1,52 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(rm -fr *)",
+      "Bash(rm -r -f *)",
+      "Bash(rm -Rf *)",
+      "Bash(rm --recursive --force *)",
+      "Bash(sudo rm -rf *)",
+      "PowerShell(Remove-Item * -Recurse -Force*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f*)",
+      "PowerShell(git push --force*)",
+      "PowerShell(git push -f*)",
+      "PowerShell(git push * --force*)",
+      "PowerShell(git push * -f*)",
+      "Bash(curl * | sh*)",
+      "Bash(curl * | bash*)",
+      "Bash(curl * | sudo sh*)",
+      "Bash(curl * | sudo bash*)",
+      "Bash(wget * | sh*)",
+      "Bash(wget * | bash*)",
+      "PowerShell(irm * | iex*)",
+      "PowerShell(iwr * | iex*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Bash(cat .env*)",
+      "Bash(cat */.env*)",
+      "PowerShell(Get-Content .env*)",
+      "PowerShell(Get-Content */.env*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell|Read|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-dangerous.js\"",
+            "timeout": 10,
+            "statusMessage": "Checking factory guard"
+          }
+        ]
+      }
+    ]
+  }
+}
